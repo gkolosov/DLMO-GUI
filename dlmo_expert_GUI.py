@@ -11,9 +11,9 @@ import datetime as dt
 # %matplotlib inline
 
 
-PATH_TRUE = "all_data/rawData/melatonin_data_N=261.csv"
-PATH_TEST = "all_data/rawData/melatonin_data_N=261_test.csv"
-PATH_SAVE = "all_data/rawData/expert_labels.pickle"
+PATH_TRUE = "data/melatonin_data_N=261.csv"
+PATH_TEST = "data/melatonin_data_N=261_test.csv"
+PATH_SAVE = "data/expert_labels.pickle"
 
 PATH = PATH_TEST
 
