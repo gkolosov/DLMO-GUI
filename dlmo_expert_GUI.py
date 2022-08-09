@@ -10,8 +10,18 @@ from ipywidgets import interact, interactive, fixed, interact_manual
 import datetime as dt
 # %matplotlib inline
 
+#
+# di = dict.fromkeys(np.unique(df['experiment_id']),0)
+# for i,k in enumerate(di.keys()):
+#     di[k]=i
+#
+# df = pd.read_csv(PATH)
+# df['study_id']="X"
+# df['melatonin']=df['melatonin'] + np.random.normal(loc=4, scale=0.5, size=len(df))
+# df = df.replace({"experiment_id": di})
+# df.to_csv(PATH, index=False)
 
-PATH_TRUE = "data/melatonin_data_N=261.csv"
+#PATH_TRUE = "data/melatonin_data_N=261.csv"
 PATH_TEST = "data/melatonin_data_N=261_test.csv"
 PATH_SAVE = "data/expert_labels.pickle"
 
