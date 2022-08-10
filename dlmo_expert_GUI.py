@@ -108,7 +108,6 @@ class DlmoGui(widgets.HBox):
         self.fig.canvas.toolbar_visible = False
         self.ax.relim()
         self.ax.autoscale()
-        #display(self.fig)
         self.fig.canvas.draw()
 
     def update_left(self, b):
@@ -123,6 +122,7 @@ class DlmoGui(widgets.HBox):
         self.saved_states[self.n].dlmo = change.new
         self.vline.remove()
         self.vline = self.ax.axvline(x=change.new, color='firebrick')
+        self.fig.canvas.draw()
 
     def update_confidence(self, change):
         self.saved_states[self.n].confidence = change.new
@@ -167,6 +167,7 @@ class DlmoGui(widgets.HBox):
         self.vline_conf_min = self.ax.axvline(x=change.new[0], color='pink', linestyle='--')
         self.vline_conf_max.remove()
         self.vline_conf_max = self.ax.axvline(x=change.new[1], color='pink', linestyle='--')
+        self.fig.canvas.draw()
 
     def observe_widgets(self):
         self.dlmo_range_widget.observe(self.update_dlmo_range, 'value')
