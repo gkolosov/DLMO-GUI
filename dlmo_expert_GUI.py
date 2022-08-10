@@ -108,6 +108,8 @@ class DlmoGui(widgets.HBox):
         self.fig.canvas.toolbar_visible = False
         self.ax.relim()
         self.ax.autoscale()
+        #display(self.fig)
+        self.fig.canvas.draw()
 
     def update_left(self, b):
         self.n = self.n - 1
