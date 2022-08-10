@@ -1,4 +1,3 @@
-ipympl
-ipywidgets
+ipympl==0.9.1
+ipywidgets==7.7.1
 pandas
-
