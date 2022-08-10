@@ -108,7 +108,6 @@ class DlmoGui(widgets.HBox):
         self.fig.canvas.toolbar_visible = False
         self.ax.relim()
         self.ax.autoscale()
-        self.fig.canvas.draw()
 
     def update_left(self, b):
         self.n = self.n - 1
@@ -157,7 +156,7 @@ class DlmoGui(widgets.HBox):
         self.prev_widget.disabled = self.n == 0
         self.next_widget.disabled = self.n == self.max_len-1
         self.button_widget.disabled = self.n != self.max_len-1
-
+        self.fig.canvas.draw()
 
     def update_dlmo_range(self, change):
         self.saved_states[self.n].dlmo_range_start = change.new[0]
