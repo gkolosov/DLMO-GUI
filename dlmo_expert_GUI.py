@@ -26,13 +26,19 @@ PATH_TEST = "data/melatonin_data_N=261_test.csv"
 PATH_SAVE = "data/expert_labels.pickle"
 
 PATH = PATH_TEST
+RED_CIRCLE = int("1F534",base=16)
+GREEN_CIRCLE = int("1F7E2",base=16)
+ORANGE_CIRCLE = int("1F7E0",base=16)
+
 
 class State():
-    def __init__(self, dlmo, dlmo_range_start, dlmo_range_end, confidence):
+    def __init__(self, dlmo, dlmo_range_start, dlmo_range_end, confidence, scorable, comment = ""):
         self.dlmo = dlmo
         self.dlmo_range_start = dlmo_range_start
         self.dlmo_range_end = dlmo_range_end
         self.confidence = confidence
+        self.scorable = scorable
+        self.comment = comment
 
 
 def get_data(experiment_id=None, path=PATH, n=0):
@@ -62,7 +68,7 @@ class DlmoGui(widgets.HBox):
         self.saved_states = dict()
         self.output = widgets.Output()
         with self.output:
-            self.fig, self.ax = plt.subplots(constrained_layout=True, figsize=(8, 5))
+            self.fig, self.ax = plt.subplots(constrained_layout=True, figsize=(10, 4.7))
             self.ax.autoscale(True)
         self.n = n
         self.max_len = get_data_len()
@@ -89,6 +95,9 @@ class DlmoGui(widgets.HBox):
         self.output.layout = make_box_layout()
         # self.fig.canvas.toolbar_position = 'bottom'
         # self.fig.canvas.toolbar_visible = False
+        self.fig.canvas.header_visible = False
+        self.fig.canvas.footer_visible = False
+
 
 
     def update_submit(self, b):
@@ -127,6 +136,15 @@ class DlmoGui(widgets.HBox):
     def update_confidence(self, change):
         self.saved_states[self.n].confidence = change.new
 
+
+    def update_comment(self, change):
+        self.saved_states[self.n].comment = change.new
+
+
+    def update_scorable(self, change):
+        self.saved_states[self.n].scorable = change.new
+        self.comment_widget.disabled = not change.new
+
     def update_profile(self, init=False):
 
         if not init:
@@ -139,17 +157,20 @@ class DlmoGui(widgets.HBox):
         self.get_data()
         if self.n not in self.saved_states:
             ### INIT soit start/end soit au milieu
-            self.saved_states[self.n] = State(dlmo=self.end_date, dlmo_range_start=self.start_date,
-                                              dlmo_range_end=self.end_date, confidence="N/A")
-            #self.saved_states[self.n] = State(dlmo=self.dates[len(self.dates)//2], dlmo_range_start=self.dates[len(self.dates)//4],
-             #                                 dlmo_range_end=self.dates[3*len(self.dates)//4], confidence="N/A")
+            #self.saved_states[self.n] = State(dlmo=self.end_date, dlmo_range_start=self.start_date,
+            #                                  dlmo_range_end=self.end_date, confidence="N/A")
+            self.saved_states[self.n] = State(dlmo=self.dates[len(self.dates)//2], dlmo_range_start=self.dates[len(self.dates)//4],
+                                              dlmo_range_end=self.dates[3*len(self.dates)//4], confidence='{} Medium'.format(chr(ORANGE_CIRCLE)), scorable=False,
+                                              comment="")
         self.init_plot()
         self.define_widgets(options=self.options)
         self.observe_widgets()
         self.dlmo_widget_box = widgets.VBox([self.dlmo_range_widget, self.dlmo_widget])
         # self.helper_widget_box = widgets.HBox([self.confidence_widget, self.profile, self.button_widget])
+        self.scorable_box = widgets.VBox([self.scorable_widget, self.comment_widget])
+
         self.helper_widget_box = widgets.HBox(
-            [self.confidence_widget, self.prev_widget, self.next_widget, self.button_widget])
+            [self.confidence_widget, self.prev_widget, self.next_widget, self.button_widget,self.scorable_box])
         self.controls = widgets.VBox([self.dlmo_widget_box, self.helper_widget_box])
         self.controls.layout = make_box_layout()
         self.children = [self.controls, self.output]
@@ -176,15 +197,10 @@ class DlmoGui(widgets.HBox):
         self.prev_widget.on_click(self.update_left)
         self.next_widget.on_click(self.update_right)
         self.confidence_widget.observe(self.update_confidence, 'value')
+        self.scorable_widget.observe(self.update_scorable, 'value')
+        self.comment_widget.observe(self.update_comment, 'value')
 
     def define_immutable_widgets(self):
-
-        self.profile = widgets.Dropdown(
-            options=[0, 1, 2],
-            value=0,
-            description='Profile:',
-            disabled=False,
-        )
 
         self.button_widget = widgets.Button(
             description='Submit All',
@@ -213,11 +229,31 @@ class DlmoGui(widgets.HBox):
         )
 
     def define_widgets(self, options):
-        self.confidence_widget = widgets.Dropdown(
-            options=["N/A", 'High', 'Medium', 'Low'],
+        # self.confidence_widget = widgets.Dropdown(
+        #     options=["N/A", 'High', 'Medium', 'Low'],
+        #     value=self.saved_states[self.n].confidence,
+        #     description='Confidence:',
+        #     disabled=False,
+        # )
+
+
+        self.scorable_widget = widgets.Checkbox(
+            value=self.saved_states[self.n].scorable,
+            description='Not Scorable',
+            disabled=False
+        )
+        self.comment_widget = widgets.Textarea(
+            value=self.saved_states[self.n].comment,
+            placeholder='Type something',
+            description='Reason:',
+            disabled=not self.saved_states[self.n].scorable
+        )
+
+        self.confidence_widget =  widgets.RadioButtons(
+            options=['{} High'.format(chr(GREEN_CIRCLE)), '{} Medium'.format(chr(ORANGE_CIRCLE)), '{} Low'.format(chr(RED_CIRCLE))],
             value=self.saved_states[self.n].confidence,
             description='Confidence:',
-            disabled=False,
+            disabled=False
         )
         self.dlmo_range_widget = widgets.SelectionRangeSlider(
             options=options,
