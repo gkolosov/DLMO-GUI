@@ -68,8 +68,10 @@ class DlmoGui(widgets.HBox):
         self.saved_states = dict()
         self.output = widgets.Output()
         with self.output:
-            self.fig, self.ax = plt.subplots(constrained_layout=True, figsize=(10, 4.7))
-            self.ax.autoscale(True)
+            #self.fig, self.ax = plt.subplots(constrained_layout=True, figsize=(10, 4.7))
+            self.fig, self.ax = plt.subplots(constrained_layout=False, figsize=(8, 4))
+            self.fig.subplots_adjust(left=0.12, right=0.9, top=0.9, bottom=0.1)
+            #self.ax.autoscale(True)
         self.n = n
         self.max_len = get_data_len()
         self.define_immutable_widgets()
@@ -171,7 +173,8 @@ class DlmoGui(widgets.HBox):
 
         self.helper_widget_box = widgets.HBox(
             [self.confidence_widget, self.prev_widget, self.next_widget, self.button_widget,self.scorable_box])
-        self.controls = widgets.VBox([self.dlmo_widget_box, self.helper_widget_box])
+        #self.controls = widgets.VBox([self.dlmo_widget_box, self.helper_widget_box])
+        self.controls = widgets.VBox([self.helper_widget_box, self.dlmo_widget_box])
         self.controls.layout = make_box_layout()
         self.children = [self.controls, self.output]
 
@@ -261,7 +264,7 @@ class DlmoGui(widgets.HBox):
             index=(self.dates.get_loc(self.saved_states[self.n].dlmo_range_start), self.dates.get_loc(self.saved_states[self.n].dlmo_range_end)),
             description='DLMO Range',
             orientation='horizontal',
-            layout={'width': '900px'}
+            layout={'width': '810px'}
         )
         self.dlmo_widget = widgets.SelectionSlider(
             options=options,
@@ -269,8 +272,9 @@ class DlmoGui(widgets.HBox):
             index=self.dates.get_loc(self.saved_states[self.n].dlmo),
             description='DLMO Value',
             orientation='horizontal',
-            layout={'width': '900px'},
+            layout={'width': '800px'},
         )
+
 
 if __name__ == '__main__':
     df = pd.read_csv(PATH)
