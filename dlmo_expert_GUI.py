@@ -30,9 +30,11 @@ RED_CIRCLE = int("1F534",base=16)
 GREEN_CIRCLE = int("1F7E2",base=16)
 ORANGE_CIRCLE = int("1F7E0",base=16)
 
+REASONS= ["Choose reason", "Not enough datapoints", " No rise / decrease","High background","Two rises"]
+
 
 class State():
-    def __init__(self, dlmo, dlmo_range_start, dlmo_range_end, confidence, scorable, comment = ""):
+    def __init__(self, dlmo, dlmo_range_start, dlmo_range_end, confidence, scorable, comment):
         self.dlmo = dlmo
         self.dlmo_range_start = dlmo_range_start
         self.dlmo_range_end = dlmo_range_end
@@ -95,6 +97,9 @@ class DlmoGui(widgets.HBox):
         self.ax.autoscale()
         self.fig.suptitle('Profile {}/{}'.format(self.n+1, self.max_len), fontweight ="bold")
         self.output.layout = make_box_layout()
+        self.ax.axhline(y=0, color='white', linestyle='--', markerfacecolor="None", alpha=0)
+
+
         # self.fig.canvas.toolbar_position = 'bottom'
         # self.fig.canvas.toolbar_visible = False
         self.fig.canvas.header_visible = False
@@ -161,9 +166,12 @@ class DlmoGui(widgets.HBox):
             ### INIT soit start/end soit au milieu
             #self.saved_states[self.n] = State(dlmo=self.end_date, dlmo_range_start=self.start_date,
             #                                  dlmo_range_end=self.end_date, confidence="N/A")
+            #self.saved_states[self.n] = State(dlmo=self.dates[len(self.dates)//2], dlmo_range_start=self.dates[len(self.dates)//4],
+             #                                 dlmo_range_end=self.dates[3*len(self.dates)//4], confidence='{} Medium'.format(chr(ORANGE_CIRCLE)), scorable=False,
+              #                                comment="")            #                                  dlmo_range_end=self.end_date, confidence="N/A")
             self.saved_states[self.n] = State(dlmo=self.dates[len(self.dates)//2], dlmo_range_start=self.dates[len(self.dates)//4],
-                                              dlmo_range_end=self.dates[3*len(self.dates)//4], confidence='{} Medium'.format(chr(ORANGE_CIRCLE)), scorable=False,
-                                              comment="")
+                                              dlmo_range_end=self.dates[3*len(self.dates)//4], confidence=None, scorable=False,
+                                              comment=REASONS[0])
         self.init_plot()
         self.define_widgets(options=self.options)
         self.observe_widgets()
@@ -245,12 +253,21 @@ class DlmoGui(widgets.HBox):
             description='Not Scorable',
             disabled=False
         )
-        self.comment_widget = widgets.Textarea(
-            value=self.saved_states[self.n].comment,
-            placeholder='Type something',
+
+        # self.comment_widget = widgets.Textarea(
+        #     value=self.saved_states[self.n].comment,
+        #     placeholder='Type something',
+        #     description='Reason:',
+        #     disabled=not self.saved_states[self.n].scorable
+        # )
+        self.comment_widget = widgets.Dropdown(
+            options=REASONS,
+            value= self.saved_states[self.n].comment ,
             description='Reason:',
             disabled=not self.saved_states[self.n].scorable
         )
+
+
 
         self.confidence_widget =  widgets.RadioButtons(
             options=['{} High'.format(chr(GREEN_CIRCLE)), '{} Medium'.format(chr(ORANGE_CIRCLE)), '{} Low'.format(chr(RED_CIRCLE))],
@@ -258,6 +275,9 @@ class DlmoGui(widgets.HBox):
             description='Confidence:',
             disabled=False
         )
+
+
+
         self.dlmo_range_widget = widgets.SelectionRangeSlider(
             options=options,
             #index=(0, len(options) - 1),
