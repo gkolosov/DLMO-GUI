@@ -64,15 +64,21 @@ def make_box_layout():
 
 class DlmoGui(widgets.HBox):
 
-    def __init__(self, n=0):
+    def __init__(self, n=0, show_dates=False):
         super().__init__()
-
+        self.show_dates= show_dates
         self.saved_states = dict()
         self.output = widgets.Output()
         with self.output:
             #self.fig, self.ax = plt.subplots(constrained_layout=True, figsize=(10, 4.7))
             self.fig, self.ax = plt.subplots(constrained_layout=False, figsize=(8, 4))
-            self.fig.subplots_adjust(left=0.12, right=0.9, top=0.9, bottom=0.1)
+            self.fig.subplots_adjust(left=0.12, right=0.9, top=0.9, bottom=0.15)
+            plt.margins(x=0.01)
+            self.ax.set_ylabel("Melatonin, pg/mL")
+            if self.show_dates:
+                self.ax.set_xlabel("Time")
+            else:
+                self.ax.set_xlabel("Elapsed time, hours")
             #self.ax.autoscale(True)
         self.n = n
         self.max_len = get_data_len()
@@ -81,23 +87,30 @@ class DlmoGui(widgets.HBox):
 
     def get_data(self):
         self.df = get_data(n=self.n)
-        self.start_date = self.df.index[0]
-        self.end_date = self.df.index[-1]
-        self.dates = pd.date_range(self.start_date, self.end_date, freq='5min')
-        self.options = [(date.strftime('%H : %M'), date) for date in self.dates]
+
+        if self.show_dates:
+            self.start_date = self.df.index[0]
+            self.end_date = self.df.index[-1]
+            self.dates = pd.date_range(self.start_date, self.end_date, freq='5min')
+            self.options = [(date.strftime('%H : %M'), date) for date in self.dates]
+        else:
+            self.df.index = (self.df.index - self.df.index[0]) / np.timedelta64(1, 'h')
+            self.end_date = self.df.index[-1]
+            self.dates = self.options = np.arange(0, self.end_date, 5/60)
 
     def init_plot(self):
-        date_form = mdates.DateFormatter('%H : %M')
         self.vline = self.ax.axvline(x=self.saved_states[self.n].dlmo, color='firebrick')
         self.vline_conf_min = self.ax.axvline(x=self.saved_states[self.n].dlmo_range_start, color='pink', linestyle='--')
         self.vline_conf_max = self.ax.axvline(x=self.saved_states[self.n].dlmo_range_end, color='pink', linestyle='--')
         self.line = self.ax.plot(self.df.index, self.df.values, linestyle='--', marker='o', color='royalblue')
-        self.ax.xaxis.set_major_formatter(date_form)
+        if self.show_dates:
+            date_form = mdates.DateFormatter('%H : %M')
+            self.ax.xaxis.set_major_formatter(date_form)
         self.ax.relim()
         self.ax.autoscale()
         self.fig.suptitle('Profile {}/{}'.format(self.n+1, self.max_len), fontweight ="bold")
         self.output.layout = make_box_layout()
-        self.ax.axhline(y=0, color='white', linestyle='--', markerfacecolor="None", alpha=0)
+        self.ax.set_ylim(ymin=0)
 
 
         # self.fig.canvas.toolbar_position = 'bottom'
@@ -277,23 +290,42 @@ class DlmoGui(widgets.HBox):
         )
 
 
-
-        self.dlmo_range_widget = widgets.SelectionRangeSlider(
-            options=options,
-            #index=(0, len(options) - 1),
-            index=(self.dates.get_loc(self.saved_states[self.n].dlmo_range_start), self.dates.get_loc(self.saved_states[self.n].dlmo_range_end)),
-            description='DLMO Range',
-            orientation='horizontal',
-            layout={'width': '810px'}
-        )
-        self.dlmo_widget = widgets.SelectionSlider(
-            options=options,
-            #index=len(options) - 1,
-            index=self.dates.get_loc(self.saved_states[self.n].dlmo),
-            description='DLMO Value',
-            orientation='horizontal',
-            layout={'width': '800px'},
-        )
+        if self.show_dates:
+            self.dlmo_range_widget = widgets.SelectionRangeSlider(
+                options=options,
+                #index=(0, len(options) - 1),
+                index=(self.dates.get_loc(self.saved_states[self.n].dlmo_range_start), self.dates.get_loc(self.saved_states[self.n].dlmo_range_end)),
+                description='DLMO Range',
+                orientation='horizontal',
+                layout={'width': '811px'}
+            )
+            self.dlmo_widget = widgets.SelectionSlider(
+                options=options,
+                index=self.dates.get_loc(self.saved_states[self.n].dlmo),
+                description='DLMO Value',
+                orientation='horizontal',
+                layout={'width': '800px'},
+            )
+        else:
+            self.dlmo_range_widget = widgets.FloatRangeSlider(
+                value=(self.saved_states[self.n].dlmo_range_start, self.saved_states[self.n].dlmo_range_end),
+                min=0,
+                max=self.end_date,
+                step=5 / 60,
+                description='DLMO Range',
+                orientation='horizontal',
+                layout={'width': '800px'}
+            )
+            self.dlmo_widget = widgets.FloatSlider(
+                value=self.saved_states[self.n].dlmo,
+                min=0,
+                max=self.end_date,
+                step=5/60,
+                description='DLMO Value',
+                orientation='horizontal',
+                layout={'width': '800px'},
+                readout=True
+            )
 
 
 if __name__ == '__main__':
