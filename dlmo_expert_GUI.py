@@ -21,11 +21,13 @@ import datetime as dt
 # df = df.replace({"experiment_id": di})
 # df.to_csv(PATH, index=False)
 
-#PATH_TRUE = "data/melatonin_data_N=261.csv"
+
+
+PATH_TRUE = "data/melatonin_data_N=261.csv"
 PATH_TEST = "data/melatonin_data_N=261_test.csv"
 PATH_SAVE = "data/expert_labels.pickle"
 
-PATH = PATH_TEST
+PATH = PATH_TRUE
 RED_CIRCLE = int("1F534",base=16)
 GREEN_CIRCLE = int("1F7E2",base=16)
 ORANGE_CIRCLE = int("1F7E0",base=16)
@@ -46,7 +48,7 @@ class State():
 def get_data(experiment_id=None, path=PATH, n=0):
     df = pd.read_csv(path)
     experiment_id = experiment_id or np.unique(df['experiment_id'])[n]
-    df = df.loc[df['experiment_id'] == experiment_id, ["clock_time", "melatonin"]]
+    df = df.loc[df['experiment_id'] == experiment_id, ["clock_time", "melatonin", "type"]]
     df['clock_time'] = pd.to_datetime(df['clock_time'])
     df = df.set_index("clock_time", drop=True)
     return df
@@ -87,6 +89,9 @@ class DlmoGui(widgets.HBox):
 
     def get_data(self):
         self.df = get_data(n=self.n)
+        assert(len(np.unique(self.df["type"]))==1)
+        self.profile_type = self.df["type"][0]
+        self.df = self.df.drop(columns="type")
 
         if self.show_dates:
             self.start_date = self.df.index[0]
@@ -108,7 +113,7 @@ class DlmoGui(widgets.HBox):
             self.ax.xaxis.set_major_formatter(date_form)
         self.ax.relim()
         self.ax.autoscale()
-        self.fig.suptitle('Profile {}/{}'.format(self.n+1, self.max_len), fontweight ="bold")
+        self.fig.suptitle('{} profile {}/{}'.format( self.profile_type, self.n+1, self.max_len), fontweight ="bold")
         self.output.layout = make_box_layout()
         self.ax.set_ylim(ymin=0)
 
@@ -327,8 +332,20 @@ class DlmoGui(widgets.HBox):
                 readout=True
             )
 
+## Add plasma/saliva
+# df = pd.read_csv(PATH_TRUE)
+# df['type'] = None
+#
+# df.loc[df['study_id'].str[:7]=='harvard', 'type']  = "plasma"
+# df.loc[df['study_id']=='zeitzer_mcr', 'type']  = "plasma"
+# df.loc[df['study_id']=='danilenko', 'type']  = "saliva"
+# df.loc[(df['study_id']=='plasma_vs_saliva')& (df['experiment_id'].str[-6:]=='plasma'),'type']  = "plasma"
+# df.loc[(df['study_id']=='plasma_vs_saliva')& (df['experiment_id'].str[-6:]=='saliva'),'type']  = "saliva"
+# df.to_csv(PATH_TRUE, index=False)
 
 if __name__ == '__main__':
     df = pd.read_csv(PATH)
     df=df.loc[df['experiment_id'].isin(["3453HY52_1","3752A_1", "990153", "4190A_saliva", "68" ])]
     df.to_csv(PATH_TEST, index=False)
+
+
