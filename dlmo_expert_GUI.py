@@ -72,10 +72,15 @@ class DlmoGui(widgets.HBox):
         self.saved_states = dict()
         self.output = widgets.Output()
         with self.output:
-            #self.fig, self.ax = plt.subplots(constrained_layout=True, figsize=(10, 4.7))
-            self.fig, self.ax = plt.subplots(constrained_layout=False, figsize=(8, 4))
-            self.fig.subplots_adjust(left=0.12, right=0.9, top=0.9, bottom=0.15)
+
+            #self.fig, self.ax = plt.subplots(constrained_layout=False, figsize=(8, 4))
+            #self.fig.subplots_adjust(left=0.12, right=0.9, top=0.9, bottom=0.15)
+            #plt.margins(x=0.01)
+            self.fig, self.ax = plt.subplots(constrained_layout=False, figsize=(9, 4))
+            self.fig.subplots_adjust(left=0.11, right=0.9, top=0.9, bottom=0.15)
             plt.margins(x=0.01)
+
+
             self.ax.set_ylabel("Melatonin, pg/mL")
             if self.show_dates:
                 self.ax.set_xlabel("Time")
@@ -302,14 +307,16 @@ class DlmoGui(widgets.HBox):
                 index=(self.dates.get_loc(self.saved_states[self.n].dlmo_range_start), self.dates.get_loc(self.saved_states[self.n].dlmo_range_end)),
                 description='DLMO Range',
                 orientation='horizontal',
-                layout={'width': '811px'}
+                #layout={'width': '811px'}
+                layout={'width': '901px'}
             )
             self.dlmo_widget = widgets.SelectionSlider(
                 options=options,
                 index=self.dates.get_loc(self.saved_states[self.n].dlmo),
                 description='DLMO Value',
                 orientation='horizontal',
-                layout={'width': '800px'},
+                #layout={'width': '800px'},
+                layout={'width': '890px'},
             )
         else:
             self.dlmo_range_widget = widgets.FloatRangeSlider(
@@ -319,7 +326,8 @@ class DlmoGui(widgets.HBox):
                 step=5 / 60,
                 description='DLMO Range',
                 orientation='horizontal',
-                layout={'width': '800px'}
+                #layout={'width': '800px'}
+                layout={'width': '890px'}
             )
             self.dlmo_widget = widgets.FloatSlider(
                 value=self.saved_states[self.n].dlmo,
@@ -328,7 +336,8 @@ class DlmoGui(widgets.HBox):
                 step=5/60,
                 description='DLMO Value',
                 orientation='horizontal',
-                layout={'width': '800px'},
+                #layout={'width': '800px'},
+                layout={'width': '890px'},
                 readout=True
             )
 
