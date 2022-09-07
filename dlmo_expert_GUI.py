@@ -24,8 +24,8 @@ import datetime as dt
 
 
 #PATH_TRUE = "data/melatonin_data_N=261.csv"
-PATH_TEST = "data/melatonin_data_N=261_test.csv"
-PATH_SAVE = "data/expert_labels.pickle"
+PATH_TEST = "../data/melatonin_data_N=261_test.csv"
+PATH_SAVE = "../data/expert_labels.pickle"
 
 PATH = PATH_TEST
 RED_CIRCLE = int("1F534",base=16)
