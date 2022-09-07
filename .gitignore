@@ -128,7 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 melatonin_data_N=261.csv
-expert_labels.pickle
 data/expert_labels.pickle
 .gitignore
 kkk.html
